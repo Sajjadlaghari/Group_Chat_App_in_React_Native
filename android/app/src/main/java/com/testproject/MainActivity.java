@@ -4,7 +4,6 @@ import com.facebook.react.ReactActivity;
 import com.facebook.react.ReactActivityDelegate;
 import com.facebook.react.ReactRootView;
 import android.os.Bundle;
-import package com.dooboolab.audiorecorderplayer.RNAudioRecorderPlayerPackage;
 
 public class MainActivity extends ReactActivity {
 
