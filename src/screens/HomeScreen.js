@@ -128,9 +128,10 @@ const Message = ({ message = null, isSender = true, userName = null, image_path 
 
                     }
                     <View style={{backgroundColor:'white',width:'100%',padding:5,borderRadius:10}}>
-                    {file_path && <Text style={{color:'black'}}>{file_path}</Text>}
+                    {file_path ? <Text style={{color:'black'}}>{file_path}</Text> : <Text></Text>}
                     
-                    {file_path && <TouchableOpacity
+                    {file_path ?<View>
+                       <TouchableOpacity
                         style={styles.button}
                         onPress={()=>{
                             checkPermission('http://192.168.18.20:8000/'+file_path)
@@ -138,7 +139,8 @@ const Message = ({ message = null, isSender = true, userName = null, image_path 
                         <Text style={{color:'purple'}}>
                             Download File
                         </Text>
-                    </TouchableOpacity>}
+                    </TouchableOpacity>
+                      </View>:<View></View>}
                         </View>
 
                         <View style={{width:'100%',borderRadius:10,backgroundColor:'white',marginTop:4}}>
@@ -205,6 +207,42 @@ function HomeScreen(props) {
             setImage(image.path);
             // console.log(image);
         });
+    }
+
+    const sendDataToServer = () =>{
+        const data_ = new FormData()
+
+        data_.append('user_id', props?.user?.user?.Data?.id),
+            data_.append('message', message),
+            image ?
+                data_.append('image_path', { uri: image, name: `${uuid.v4()}.jpg`, type: 'image/jpg' })
+                :
+                data_.append('image_path', null)
+        singleFile ?
+            data_.append('file_path', singleFile)
+            :
+            data_.append('file_path', null)
+
+        //   alert(JSON.stringify(singleFile,null,2))
+
+        const messageData = {
+            message: message,
+            user_id: props?.user?.user?.Data?.id,
+            user_name: props?.user?.user?.Data?.name,
+            image_path: image,
+            file_path: singleFile.name
+        }
+
+        props.send(data_, messageData);
+
+        setMessage('');
+
+
+        // flatlistRef.current.scrollToIndex({
+        //     animated: true,
+        //     index: 1,
+        //     viewPosition: 0
+        // })
     }
 
 
@@ -298,41 +336,10 @@ function HomeScreen(props) {
                         <TouchableOpacity style={[styles.send, { backgroundColor: 'green', padding: 13 }]}
                             onPress={() => {
                                 // console.log(data_)
+                                sendDataToServer();
 
 
-                                const data_ = new FormData()
-
-                                data_.append('user_id', props?.user?.user?.Data?.id),
-                                    data_.append('message', message),
-                                    image ?
-                                        data_.append('image_path', { uri: image, name: `${uuid.v4()}.jpg`, type: 'image/jpg' })
-                                        :
-                                        data_.append('image_path', null)
-                                singleFile ?
-                                    data_.append('file_path', singleFile)
-                                    :
-                                    data_.append('file_path', null)
-
-                                //   alert(JSON.stringify(singleFile,null,2))
-
-                                const messageData = {
-                                    message: message,
-                                    user_id: props?.user?.user?.Data?.id,
-                                    user_name: props?.user?.user?.Data?.name,
-                                    image_path: image,
-                                    file_path: singleFile
-                                }
-
-                                props.send(data_, messageData);
-
-                                setMessage('');
-
-
-                                // flatlistRef.current.scrollToIndex({
-                                //     animated: true,
-                                //     index: 1,
-                                //     viewPosition: 0
-                                // })
+                             
                             }}
                         >
                             <Text style={{ fontSize: 15, fontWeight: 'bold', color: '#fff' }}>
