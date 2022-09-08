@@ -9,10 +9,12 @@ import AudioRecorderPlayer, {
 } from 'react-native-audio-recorder-player';
 
 
+
+
 var path = 'test3.m4a'
 
 
-const onStartRecord = async (audioRecorderPlayer, setRecordSecs, setRecordTime) => {
+export const onStartRecord = async (audioRecorderPlayer, setRecordSecs, setRecordTime) => {
 
   const path = path;
   const audioSet = {
@@ -23,28 +25,39 @@ const onStartRecord = async (audioRecorderPlayer, setRecordSecs, setRecordTime) 
       AVFormatIDKeyIOS: AVEncodingOption.aac,
   };
   console.log('audioSet', audioSet);
-  const uri = await audioRecorderPlayer.current.startRecorder(path, audioSet);
+  var uri = await audioRecorderPlayer.current.startRecorder(path, audioSet);
   audioRecorderPlayer.current.addRecordBackListener((e) => {
+      // / setRecordTime(audioRecorderPlayer.current.mmssss(
+      //       Math.floor(e.currentPosition),
+      //   ))
 
-      setRecordSecs(e.currentPosition);
-      setRecordTime(audioRecorderPlayer.current.mmssss(
-          Math.floor(e.currentPosition),
-      ))
+      // setRecordSecs(e.currentPosition);
+      // /
 
   });
-  console.log(`uri: ${uri}`);
+  console.log('Hello ' +path);
+  
+  // console.log(`uri: ${uri}`);
+  setRecordTime(uri)
+  // setRecordTime(uri)
+  
+
 };
 
 
 
-const onStopRecord = async (audioRecorderPlayer, setRecordSecs) => {
+
+
+export const onStopRecord = async (audioRecorderPlayer, setRecordSecs) => {
   const result = await audioRecorderPlayer.current.stopRecorder();
-  audioRecorderPlayer.current.removeRecordBackListener();
+  // audioRecorderPlayer.current.removeRecordBackListener();
   setRecordSecs(0)
   console.log(result);
+  
+
 };
 
-const onStartPlay = async (audioRecorderPlayer, setDuration, setPlayTime, setCurrentDurationSec, setCurrentPositionSec) => {
+export const onStartPlay = async (audioRecorderPlayer, setDuration, setPlayTime, setCurrentDurationSec, setCurrentPositionSec) => {
   console.log('onStartPlay');
   const path = path
   const msg = await audioRecorderPlayer.current.startPlayer(path);
@@ -66,17 +79,20 @@ const onStartPlay = async (audioRecorderPlayer, setDuration, setPlayTime, setCur
 };
 
 
- const onPausePlay = async (audioRecorderPlayer) => {
+export const onPausePlay = async (audioRecorderPlayer) => {
   audioRecorderPlayer.current.pausePlayer();
+  console.log('Paused');
+
+
 };
 
- const onStopPlay = async (audioRecorderPlayer) => {
+ export const onStopPlay = async (audioRecorderPlayer) => {
   console.log('onStopPlay');
   audioRecorderPlayer.current.stopPlayer();
   audioRecorderPlayer.current.removePlayBackListener();
 }
 
-export default Camera = () => {
+export default Voice = () => {
   const [recordSecs, setRecordSecs] = useState(0);
   const [recordTime, setRecordTime] = useState('00:00:00');
   const [currentPositionSec, setCurrentPositionSec] = useState(0);

@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, TextInput, Dimensions, Image, TouchableOpacity, ImageBackground,Platform,PermissionsAndroid } from 'react-native'
+import { StyleSheet, Text, Modal, Pressable, View, TextInput, Dimensions, Image, TouchableOpacity, ImageBackground, Platform, PermissionsAndroid } from 'react-native'
 import React, { useEffect, useState, useRef } from 'react'
 import { FlatList, ScrollView } from 'react-native-gesture-handler'
 import { connect } from 'react-redux';
@@ -8,10 +8,25 @@ import { send_message } from '../redux/actions/sendMessageAction'
 import uuid from 'react-native-uuid';
 import { Button } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/AntDesign';
+import IconFeather from 'react-native-vector-icons/Feather';
 import IconMaterial from 'react-native-vector-icons/MaterialIcons';
 import ImagePicker from 'react-native-image-crop-picker';
 import DocumentPicker from 'react-native-document-picker'
 import RNFetchBlob from 'rn-fetch-blob';
+import Lottie from 'lottie-react-native';
+import {onStartRecord,onStopRecord,onStartPlay,onPausePlay,onStopPlay} from '../screens/Voice'
+
+import AudioRecorderPlayer, {
+    AVEncoderAudioQualityIOSType,
+    AVEncodingOption,
+    AudioEncoderAndroidType,
+    AudioSet,
+    AudioSourceAndroidType,
+  } from 'react-native-audio-recorder-player';
+  
+  var path = 'test3.m4a'
+  
+
 
 
 
@@ -127,30 +142,30 @@ const Message = ({ message = null, isSender = true, userName = null, image_path 
                         isSender && <Text style={{ paddingTop: 0, color: 'purple' }}>{userName}</Text>
 
                     }
-                    <View style={{backgroundColor:'white',width:'100%',padding:5,borderRadius:10}}>
-                    {file_path ? <Text style={{color:'black'}}>{file_path}</Text> : <Text></Text>}
-                    
-                    {file_path ?<View>
-                       <TouchableOpacity
-                        style={styles.button}
-                        onPress={()=>{
-                            checkPermission('http://192.168.18.20:8000/'+file_path)
-                        }}>
-                        <Text style={{color:'purple'}}>
-                            Download File
-                        </Text>
-                    </TouchableOpacity>
-                      </View>:<View></View>}
-                        </View>
+                    <View style={{ backgroundColor: 'white', width: '100%', padding: 5, borderRadius: 10 }}>
+                        {file_path ? <Text style={{ color: 'black' }}>{file_path}</Text> : <Text></Text>}
 
-                        <View style={{width:'100%',borderRadius:10,backgroundColor:'white',marginTop:4}}>
-                            
-                    {image_path && <Image style={{ width: 200, height: 200, borderWidth: 2, borderColor: 'black' }} source={{ uri: 'http://192.168.18.20:8000/' + image_path }} />}
-                    <Text style={[isSender ? styles.messageRecieverText : styles.messageSenderText,{paddingLeft:8}]}>
-                        {message}
-                    </Text>
-                        </View>
-                
+                        {file_path ? <View>
+                            <TouchableOpacity
+                                style={styles.button}
+                                onPress={() => {
+                                    checkPermission('http://192.168.18.20:8000/' + file_path)
+                                }}>
+                                <Text style={{ color: 'purple' }}>
+                                    Download File
+                                </Text>
+                            </TouchableOpacity>
+                        </View> : <View></View>}
+                    </View>
+
+                    <View style={{ width: '100%', borderRadius: 10, backgroundColor: 'white', marginTop: 4 }}>
+
+                        {image_path && <Image style={{ width: 200, height: 200, borderWidth: 2, borderColor: 'black' }} source={{ uri: 'http://192.168.18.20:8000/' + image_path }} />}
+                        <Text style={[isSender ? styles.messageRecieverText : styles.messageSenderText, { paddingLeft: 8 }]}>
+                            {message}
+                        </Text>
+                    </View>
+
                 </View>
             </View>
 
@@ -161,10 +176,23 @@ const Message = ({ message = null, isSender = true, userName = null, image_path 
 
 function HomeScreen(props) {
 
-    const [message, setMessage] = useState();
+    const [message, setMessage] = useState('');
     const [image, setImage] = useState();
     const flatlistRef = useRef();
     const [singleFile, setSingleFile] = useState('');
+    const [modalVisible, setModalVisible] = useState(false);
+    const [showSend, SetShowSend] = useState(true);
+    const [isRecording, setIsRecording] = useState(false);
+    const [isRecorded, setIsRecorded] = useState(false);
+
+    const [recordSecs, setRecordSecs] = useState(0);
+    const [recordTime, setRecordTime] = useState('00:00:00');
+    const [currentPositionSec, setCurrentPositionSec] = useState(0);
+    const [currentDurationSec, setCurrentDurationSec] = useState(0);
+    const [playTime, setPlayTime] = useState('00:00:00');
+    const [duration, setDuration] = useState('00:00:00');
+    const audioRecorderPlayer = useRef(new AudioRecorderPlayer());
+    audioRecorderPlayer.current.setSubscriptionDuration(0.09);
 
     // This is DocumentPicker with this you can pick any file and also image
     const selectOneFile = async () => {
@@ -187,14 +215,25 @@ function HomeScreen(props) {
     useEffect(() => {
         props.getMessage();
 
-   
+
         if (props.message) {
-        
+
 
         }
         return () => {
         }
     }, []);
+
+
+    useEffect(() => {
+        // console.log(message.length)
+        if (message.length > 0) {
+            SetShowSend(false);
+        }
+        else if (message.length == 0) {
+            SetShowSend(true);
+        }
+    }, [message]);
 
 
     // This Part is for Select Image From Gallery
@@ -209,7 +248,7 @@ function HomeScreen(props) {
         });
     }
 
-    const sendDataToServer = () =>{
+    const sendDataToServer = () => {
         const data_ = new FormData()
 
         data_.append('user_id', props?.user?.user?.Data?.id),
@@ -221,7 +260,9 @@ function HomeScreen(props) {
         singleFile ?
             data_.append('file_path', singleFile)
             :
-            data_.append('file_path', null)
+            data_.append('file_path', recordTime)
+            console.log("CONSOLE>LOG"+recordTime);
+
 
         //   alert(JSON.stringify(singleFile,null,2))
 
@@ -244,7 +285,6 @@ function HomeScreen(props) {
         //     viewPosition: 0
         // })
     }
-
 
     return (
 
@@ -333,28 +373,158 @@ function HomeScreen(props) {
 
                     <View style={{ flex: 1, justifyContent: 'flex-end', width: '20%' }}>
 
-                        <TouchableOpacity style={[styles.send, { backgroundColor: 'green', padding: 13 }]}
-                            onPress={() => {
-                                // console.log(data_)
-                                sendDataToServer();
-
-
-                             
-                            }}
+                        {showSend ? <TouchableOpacity style={[styles.send, { backgroundColor: 'green', }]}
+                            onPress={() => setModalVisible(true)}
                         >
-                            <Text style={{ fontSize: 15, fontWeight: 'bold', color: '#fff' }}>
-                                Send
-                            </Text>
-                        </TouchableOpacity>
+                            <IconMaterial name='mic' size={45} color={'#fff'} style={{ padding: 5, textAlign: 'center' }} />
 
+                        </TouchableOpacity>
+                            : <TouchableOpacity style={[styles.send, { backgroundColor: 'green', }]}
+                                onPress={() => {
+                                    // console.log(data_)
+                                    sendDataToServer();
+                                }}
+                            >
+                                <IconMaterial name='send' size={30} color={'#fff'} style={{ padding: 10, textAlign: 'center' }} />
+                            </TouchableOpacity>}
                     </View>
                 </View>
             </ImageBackground>
+
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={() => {
+                    alert("Modal has been closed.");
+                    setModalVisible(!modalVisible);
+                }}
+            >
+                <View style={styles.centeredView}>
+                    <View style={styles.modalView}>
+                        {isRecording ?
+                            <View>
+                                 <Lottie source={require('./microphone.json')}  autoPlay loop  style={{width:70, height:120,textAlign: 'center' }}/>
+
+                                <TouchableOpacity style={{ width: '60%', borderRadius: 30, marginBottom: 10 }}
+                                 onPress={()=>{
+                                    setIsRecording(false);
+                                    setIsRecorded(true);
+                                    onStopRecord(audioRecorderPlayer, setRecordSecs);
+
+
+                                }}
+                                >
+                                    <Text style={{ backgroundColor: 'red', borderRadius: 30, color: '#fff', padding: 10, textAlign: 'center', fontWeight: 'bold' }}>Stop Recording</Text>
+                                </TouchableOpacity>
+                            </View> :
+                            <View>
+                                <IconMaterial name='mic' size={85} color={'orange'} style={{ padding: 5, textAlign: 'center' }} />
+
+                                <TouchableOpacity style={{ width: '60%', borderRadius: 30, marginBottom: 10 }}
+                                 onPress={()=>{
+                                    onStartRecord(audioRecorderPlayer, setRecordSecs, setRecordTime);
+                                    
+                                     setIsRecording(true);
+                                 }}
+                                >
+                                    <Text style={{ backgroundColor: 'green', borderRadius: 30, color: '#fff', padding: 10, textAlign: 'center', fontWeight: 'bold' }}>Start Recording</Text>
+                                </TouchableOpacity>
+                            </View>
+                        }
+                        {isRecorded ? <View style={{flexDirection:'row'}}>
+                            <TouchableOpacity 
+                         onPress={()=>{
+                            onStartPlay(audioRecorderPlayer, setDuration, setPlayTime, setCurrentDurationSec, setCurrentPositionSec);
+                         }}
+                        >
+                            <IconMaterial name='play-circle-outline' size={45} color={'orange'} style={{ padding: 5, textAlign: 'center' }} />
+
+                        </TouchableOpacity>
+
+                        <TouchableOpacity 
+                         onPress={()=>{
+                            onPausePlay(audioRecorderPlayer);
+                         }}
+                        >
+                            <IconMaterial name='pause-circle-outline' size={45} color={'orange'} style={{ padding: 5, textAlign: 'center' }} />
+                        </TouchableOpacity>
+                        <TouchableOpacity 
+                         onPress={()=>{
+                            onStopPlay(audioRecorderPlayer);
+                         }}
+                        >
+                            <IconMaterial name='play-circle-outline' size={45} color={'orange'} style={{ padding: 5, textAlign: 'center' }} />
+
+                        </TouchableOpacity>
+
+                        
+
+
+                        
+
+                        </View>:<Text></Text>}
+
+
+                        <Pressable
+                            style={[styles.button, styles.buttonClose]}
+                            onPress={() => setModalVisible(!modalVisible)}
+                        >
+                            <IconFeather name='delete' color={'#fff'} size={22} />
+                        </Pressable>
+                    </View>
+                </View>
+            </Modal>
+
         </View>
     )
 }
 
 const styles = StyleSheet.create({
+    centeredView: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        marginTop: 22
+    },
+    modalView: {
+        width: '100%',
+        height: 300,
+        marginTop: 200,
+        justifyContent: 'center',
+        margin: 20,
+        backgroundColor: "white",
+        borderRadius: 20,
+        padding: 35,
+        alignItems: "center",
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5
+    },
+    button: {
+        borderRadius: 20,
+        padding: 10,
+        elevation: 2
+    },
+
+    buttonClose: {
+
+        backgroundColor: "#2196F3",
+    },
+    textStyle: {
+        color: "white",
+        fontWeight: "bold",
+        textAlign: "center"
+    },
+    modalText: {
+        marginBottom: 15,
+        textAlign: "center"
+    },
     Topbar:
     {
         height: 60,
@@ -388,7 +558,7 @@ const styles = StyleSheet.create({
         paddingVertical: 3,
         paddingHorizontal: 5,
         maxWidth: '61%',
-        paddingLeft:6,
+        paddingLeft: 6,
         marginVertical: 4,
         borderTopLeftRadius: 15,
         borderTopRightRadius: 15,
@@ -396,7 +566,7 @@ const styles = StyleSheet.create({
     },
     messageReciever:
     {
-        paddingLeft:6,
+        paddingLeft: 6,
         paddingVertical: 14,
         paddingHorizontal: 5,
         maxWidth: '80%',

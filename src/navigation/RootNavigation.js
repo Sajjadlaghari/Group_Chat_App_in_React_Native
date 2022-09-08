@@ -8,7 +8,7 @@ import HomeScreen from "../screens/HomeScreen";
 import LoginScreen from "../screens/LoginScreen";
 import SignupScreen from "../screens/SignupScreen";
 import {connect} from 'react-redux';
-import Camera from '../screens/Camera'
+import Voice from '../screens/Voice'
 import VoiceMessageAttachment from '../screens/AudioRecord'
 
 
@@ -44,8 +44,8 @@ const AuthRoute = () => {
                 }}
             />
                  <Stack.Screen
-                name="Camera"
-                component={VoiceMessageAttachment}
+                name="Voice"
+                component={Voice}
                 options={{
                     headerShown: false,
                 }}
