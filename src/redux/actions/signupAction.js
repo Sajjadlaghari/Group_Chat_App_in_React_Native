@@ -16,7 +16,6 @@ const signup_loading = () => {
 
 }
 const signup_failed = (data) => {
-    alert("Action fired");
     return {
 
         type: ActionTypes.SIGNUP_USER_FAILED,
@@ -25,10 +24,11 @@ const signup_failed = (data) => {
 }
 
 export const signup_user = (data) => {
+    alert(JSON.stringify(data,null,2))
     return (dispatch) => {
         dispatch(signup_loading())
 
-        fetch("http://192.168.18.20:8000/api/registration", {
+        fetch("http://192.168.18.22:8000/api/registration", {
 
             method: "POST",
             body: JSON.stringify(data),

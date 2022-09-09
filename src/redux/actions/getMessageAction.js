@@ -26,7 +26,7 @@ export const get_message = () => {
     return (dispatch) => {
         dispatch(get_message_loading())
 
-        fetch("http://192.168.18.20:8000/api/get_all_messages", {
+        fetch("http://192.168.18.22:8000/api/get_all_messages/", {
 
             method: "GET",
             // body: JSON.stringify(),

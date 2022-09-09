@@ -27,7 +27,7 @@ export const onStartRecord = async (audioRecorderPlayer, setRecordSecs, setRecor
   console.log('audioSet', audioSet);
   var uri = await audioRecorderPlayer.current.startRecorder(path, audioSet);
   audioRecorderPlayer.current.addRecordBackListener((e) => {
-      // / setRecordTime(audioRecorderPlayer.current.mmssss(
+      //  setRecordTime(audioRecorderPlayer.current.mmssss(
       //       Math.floor(e.currentPosition),
       //   ))
 
@@ -35,11 +35,10 @@ export const onStartRecord = async (audioRecorderPlayer, setRecordSecs, setRecor
       // /
 
   });
-  console.log('Hello ' +path);
   
   // console.log(`uri: ${uri}`);
-  setRecordTime(uri)
   // setRecordTime(uri)
+  setRecordTime(uri)
   
 
 };
@@ -48,11 +47,12 @@ export const onStartRecord = async (audioRecorderPlayer, setRecordSecs, setRecor
 
 
 
-export const onStopRecord = async (audioRecorderPlayer, setRecordSecs) => {
+export const onStopRecord = async (audioRecorderPlayer, setRecordSecs,setRecordTime) => {
   const result = await audioRecorderPlayer.current.stopRecorder();
   // audioRecorderPlayer.current.removeRecordBackListener();
   setRecordSecs(0)
-  console.log(result);
+  setRecordTime(result);
+  console.log('Stop Recorded')
   
 
 };

@@ -149,7 +149,7 @@ const Message = ({ message = null, isSender = true, userName = null, image_path 
                             <TouchableOpacity
                                 style={styles.button}
                                 onPress={() => {
-                                    checkPermission('http://192.168.18.20:8000/' + file_path)
+                                    checkPermission('http://192.168.18.22:8000/' + file_path)
                                 }}>
                                 <Text style={{ color: 'purple' }}>
                                     Download File
@@ -160,7 +160,7 @@ const Message = ({ message = null, isSender = true, userName = null, image_path 
 
                     <View style={{ width: '100%', borderRadius: 10, backgroundColor: 'white', marginTop: 4 }}>
 
-                        {image_path && <Image style={{ width: 200, height: 200, borderWidth: 2, borderColor: 'black' }} source={{ uri: 'http://192.168.18.20:8000/' + image_path }} />}
+                        {image_path && <Image style={{ width: 200,borderRadius:10, height: 200, borderWidth: 2, borderColor: 'black' }} source={{ uri: 'http://192.168.18.22:8000/' + image_path }} />}
                         <Text style={[isSender ? styles.messageRecieverText : styles.messageSenderText, { paddingLeft: 8 }]}>
                             {message}
                         </Text>
@@ -260,8 +260,9 @@ function HomeScreen(props) {
         singleFile ?
             data_.append('file_path', singleFile)
             :
-            data_.append('file_path', recordTime)
-            console.log("CONSOLE>LOG"+recordTime);
+            data_.append('file_path', null)
+            data_.append('audio', recordTime)
+
 
 
         //   alert(JSON.stringify(singleFile,null,2))
@@ -410,7 +411,7 @@ function HomeScreen(props) {
                                  onPress={()=>{
                                     setIsRecording(false);
                                     setIsRecorded(true);
-                                    onStopRecord(audioRecorderPlayer, setRecordSecs);
+                                    onStopRecord(audioRecorderPlayer, setRecordSecs,setRecordTime);
 
 
                                 }}
@@ -547,7 +548,6 @@ const styles = StyleSheet.create({
     {
         maxWidth: '99%',
         maxHeight: 200,
-        border: 'none',
         backgroundColor: '#fff',
         flex: 1
 
@@ -569,7 +569,7 @@ const styles = StyleSheet.create({
         paddingLeft: 6,
         paddingVertical: 14,
         paddingHorizontal: 5,
-        maxWidth: '80%',
+        maxWidth: '75%',
         marginVertical: 5,
         borderTopLeftRadius: 15,
         borderTopRightRadius: 15,

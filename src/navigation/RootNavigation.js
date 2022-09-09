@@ -10,6 +10,7 @@ import SignupScreen from "../screens/SignupScreen";
 import {connect} from 'react-redux';
 import Voice from '../screens/Voice'
 import VoiceMessageAttachment from '../screens/AudioRecord'
+import { Recorder } from "../screens/Recorder";
 
 
 

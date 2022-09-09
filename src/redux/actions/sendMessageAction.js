@@ -29,7 +29,7 @@ export const send_message = (data,messageData) => {
     return (dispatch) => {
         // dispatch(send_message_loading())
 
-        fetch("http://192.168.18.20:8000/api/send_message", {
+        fetch("http://192.168.18.22:8000/api/send_message", {
 
             method: "POST",
             body: data,

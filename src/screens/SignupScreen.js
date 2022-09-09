@@ -32,7 +32,7 @@ function SignupScreen(props) {
     useEffect(()=>{
         if(props.user.errorMsg)
         {
-            alert(JSON.stringify(props?.user?.errorMsg?.email[0],null,2))
+            // alert(JSON.stringify(props?.user?.errorMsg?.email[0],null,2))
         }
         
     },[props.user.errorMsg])

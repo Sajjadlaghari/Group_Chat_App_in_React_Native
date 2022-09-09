@@ -23,12 +23,13 @@ const login_failed = (data) => {
 }
 
 export const user_login = (data) => {
+    // alert(JSON.stringify(data,null,2))
 
 
     return (dispatch) => {
         dispatch(login_loading())
 
-        fetch('http://192.168.18.20:8000/api/login', {
+        fetch('http://192.168.18.22:8000/api/login/', {
 
             method: "POST",
             body: JSON.stringify(data),
@@ -41,9 +42,9 @@ export const user_login = (data) => {
         })
             .then((response) => response.json())
             .then((data) => {
-                alert(JSON.stringify(data,null,2))
+                // alert(JSON.stringify(data,null,2))
                 if (data.status == false && data.error) {
-                    alert(JSON.stringify(data, null, 2))
+                    // alert(JSON.stringify(data, null, 2))
                     dispatch(login_failed(data.error))
                 }
                 else
